@@ -1,0 +1,10 @@
+services:
+  ui:
+    build:
+      args:
+        cmd: puma --debug -w 2
+
+  comment:
+    build:
+      args:
+        cmd: puma --debug -w 2

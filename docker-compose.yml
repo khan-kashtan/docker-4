@@ -1,0 +1,68 @@
+version: '3.3'
+services:
+
+  post_db:
+    image: mongo:${db_version}
+    volumes:
+      - post_db:/data/db
+    networks:
+      back_net:
+        aliases:
+          - comment_db
+          - post_db
+
+  ui:
+    build:
+      context: ./ui
+      args:
+        cmd: puma
+    env_file:
+      - .env
+    image: ${username}/ui:${ui_version}
+    ports:
+      - ${port}:${port}/tcp
+    networks:
+      - front_net
+
+  post:
+    build: ./post-py
+    env_file:
+      - .env
+    image: ${username}/post:${post_version}
+    networks:
+      back_net:
+        aliases:
+          - post
+      front_net:
+        aliases:
+          - post
+
+  comment:
+    build:
+      context: ./comment
+      args:
+        cmd: puma
+    env_file:
+      - .env
+    image: ${username}/comment:${comment_version}
+    networks:
+      back_net:
+        aliases:
+          - comment
+      front_net:
+        aliases:
+          - comment
+
+volumes:
+  post_db:
+
+networks:
+  front_net:
+    ipam:
+      config:
+        - subnet: ${front_net_range}
+  back_net:
+    ipam:
+      config:
+        - subnet: ${back_net_range}
+
